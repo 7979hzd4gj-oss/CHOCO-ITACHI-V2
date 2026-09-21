@@ -1,67 +1,68 @@
 {
-  "name": "mega-md",
-  "description": "High performance multi-device WhatsApp bot",
-  "keywords": ["whatsapp-bot", "baileys", "mega-md"],
-  "repository": "https://github.com/GlobalTechInfo/MEGA-MD",
+  "name": "CHOCO-ITACHI-V2",
+  "description": "🍫 CHOCO-ITACHI-V2 - Le bot WhatsApp le plus violent 😈 Multi-device ultra rapide",
+  "keywords": ["whatsapp-bot", "baileys", "choco-itachi", "choco-md", "choco-bot"],
+  "repository": "https://github.com/CHOCO-ITACHI/CHOCO-ITACHI-V2",
+  "logo": "https://files.catbox.moe/TON-LIEN-LOGO.png",
   "stack": "container",
   "env": {
     "SESSION_ID": {
-      "description": "Your session ID (get it by running the bot locally first)",
+      "description": "🍫 SESSION_ID CHOCO - Déploie local d'abord pour l'obtenir 😈",
       "required": true,
       "value": ""
     },
     "OWNER_NUMBER": {
-      "description": "Your WhatsApp number with country code (e.g. 923001234567)",
+      "description": "Numéro du owner avec indicatif (ex: 2246XXXXXXXX)",
       "required": true,
-      "value": "923000000000"
+      "value": "224000000000"
     },
     "MONGO_URL": {
-      "description": "MongoDB URL for persistent storage (recommended for Heroku)",
+      "description": "MongoDB URL (recommandé pour Heroku)",
       "required": false,
       "value": ""
     },
     "POSTGRES_URL": {
-      "description": "PostgreSQL URL for persistent storage",
+      "description": "PostgreSQL URL (optionnel)",
       "required": false,
       "value": ""
     },
     "MYSQL_URL": {
-      "description": "MySQL URL for persistent storage",
+      "description": "MySQL URL (optionnel)",
       "required": false,
       "value": ""
     },
     "BOT_NAME": {
-      "description": "Your bot name",
+      "description": "Nom du bot",
       "required": false,
-      "value": "MEGA-MD"
+      "value": "CHOCO-ITACHI-V2"
     },
     "BOT_OWNER": {
-      "description": "Owner display name",
+      "description": "Nom du owner",
       "required": false,
-      "value": "GlobalTech"
+      "value": "CHOCO ITACHI"
     },
     "PREFIXES": {
-      "description": "Command prefixes separated by comma (e.g. .,!,/)",
+      "description": "Préfixes (ex: .,!,/,🍫)",
       "required": false,
       "value": "."
     },
     "PACKNAME": {
-      "description": "Sticker pack name",
+      "description": "Nom du pack sticker",
       "required": false,
-      "value": "MEGA-MD"
+      "value": "CHOCO-ITACHI-V2 😈"
     },
     "COMMAND_MODE": {
-      "description": "Bot mode: public or private",
+      "description": "Mode: public ou private",
       "required": false,
       "value": "public"
     },
     "TIMEZONE": {
-      "description": "Your timezone (e.g. Asia/Karachi, America/New_York)",
+      "description": "Timezone (ex: Africa/Conakry, Africa/Abidjan, Asia/Karachi)",
       "required": false,
-      "value": "Asia/Karachi"
+      "value": "Africa/Conakry"
     },
     "REMOVEBG_KEY": {
-      "description": "Remove.bg API key for background removal",
+      "description": "Clé API Remove.bg (pour sticker bg)",
       "required": false,
       "value": ""
     }
