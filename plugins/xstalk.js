@@ -1,54 +1,41 @@
 import axios from 'axios';
+
+const CHOCO_IMG = "https://files.catbox.moe/ykfu82.png";
+
 export default {
     command: 'xstalk',
-    aliases: ['twstalk', 'xprofile'],
+    aliases: ['twstalk', 'xprofile', 'chocox'],
     category: 'stalk',
-    description: 'Lookup Twitter user profile',
-    usage: '.xstalk <username>',
+    description: 'Lookup Twitter/X profile - CHOCO-ITACHI-V2 😈🍫',
+    usage: '🍫xstalk <username>',
     async handler(sock, message, args, context) {
         const chatId = context.chatId || message.key.remoteJid;
+        const prefix = "🍫";
+        
         if (!args.length) {
             return await sock.sendMessage(chatId, {
-                text: '*Please provide a Twitter username.*\nExample: .xstalk HarmeetSinghPk'
+                text: `🍫 *CHOCO X STALK* 😈\n\nDonne un username Twitter\nExemple: ${prefix}xstalk ElonMusk`
             }, { quoted: message });
         }
-        const username = args[0];
+        const username = args[0].replace('@','');
         try {
+            await sock.sendMessage(chatId, { react: { text: '🍫', key: message.key } });
+            
             const { data } = await axios.get(`https://discardapi.dpdns.org/api/stalk/twitter`, {
                 params: { apikey: 'guru', username }
             });
+            
             if (!data?.result) {
-                return await sock.sendMessage(chatId, { text: '❌ Twitter user not found.' }, { quoted: message });
+                return await sock.sendMessage(chatId, { text: '❌ Utilisateur X non trouvé 😈🍫' }, { quoted: message });
             }
+            
             const result = data.result;
-            const profileImage = result.profile?.image || null;
+            const profileImage = result.profile?.image || CHOCO_IMG;
             const bannerImage = result.profile?.banner || null;
-            const verifiedMark = result.verified ? '✅ Verified' : '';
-            const caption = `🐦 *Twitter Profile Info*\n\n` +
-                `👤 Name: ${result.name || 'N/A'} ${verifiedMark}\n` +
-                `🆔 Username: @${result.username || 'N/A'}\n` +
-                `📝 Bio: ${result.description || 'N/A'}\n` +
-                `📍 Location: ${result.location || 'N/A'}\n` +
-                `📅 Joined: ${new Date(result.created_at).toDateString()}\n\n` +
-                `👥 Followers: ${result.stats?.followers || 0}\n` +
-                `➡ Following: ${result.stats?.following || 0}\n` +
-                `❤️ Likes: ${result.stats?.likes || 0}\n` +
-                `🖼 Media: ${result.stats?.media || 0}\n` +
-                `🐦 Tweets: ${result.stats?.tweets || 0}\n` +
-                `🔗 Profile URL: https://twitter.com/${result.username}`;
-            if (profileImage) {
-                await sock.sendMessage(chatId, { image: { url: profileImage }, caption }, { quoted: message });
-            }
-            else {
-                await sock.sendMessage(chatId, { text: caption }, { quoted: message });
-            }
-            if (bannerImage) {
-                await sock.sendMessage(chatId, { image: { url: bannerImage }, caption: `📌 Banner of @${username}` });
-            }
-        }
-        catch (err) {
-            console.error('Twitter plugin error:', err);
-            await sock.sendMessage(chatId, { text: '❌ Failed to fetch Twitter profile.' }, { quoted: message });
-        }
-    }
-};
+            const verifiedMark = result.verified ? '✅ Vérifié' : '❌ Non vérifié';
+            
+            const caption = `┏━━ 🍫 *CHOCO X STALK* 😈 ━━┓\n`+
+                `┃\n`+
+                `┃ 👤 *Nom:* ${result.name || 'N/A'} ${verifiedMark}\n`+
+                `┃ 🆔 *Username:* @${result.username || 'N/A'}\n`+
+                `┃ 📝 *Bio:* ${result
