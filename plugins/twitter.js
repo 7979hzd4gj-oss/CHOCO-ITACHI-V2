@@ -1,47 +1,50 @@
 import axios from 'axios';
+import { channelInfo } from '../lib/messageConfig.js';
+
+const CHOCO_PHOTO = "https://files.catbox.moe/TON-LIEN-ICI.jpg";
+
 export default {
     command: 'twitter',
-    aliases: ['xtweet', 'tweetdl', 'twitterdl'],
+    aliases: ['xtweet', 'tweetdl', 'twitterdl', 'x', 'xdl'],
     category: 'download',
-    description: 'Download media (video or image) from X/Twitter post',
+    description: 'CHOCO - Download X/Twitter media',
     usage: '.twitter <Tweet URL>',
+
     async handler(sock, message, args, context) {
         const chatId = context.chatId || message.key.remoteJid;
         const url = args?.[0];
         if (!url) {
-            return await sock.sendMessage(chatId, { text: 'Please provide a Twitter/X URL.\nExample: .twitter https://x.com/i/status/2002054360428167305' }, { quoted: message });
+            return sock.sendMessage(chatId, {
+                image: { url: CHOCO_PHOTO },
+                caption:`🍫 *CHOCO TWITTER DL* 😈\n\n💀 Envoie un lien X chef!\n📌 Ex:.twitter https://x.com/i/status/2002054360428167305`,
+          ...channelInfo
+            }, { quoted: message });
         }
         try {
-            const apiUrl = `https://discardapi.dpdns.org/api/dl/twitter?apikey=guru&url=${encodeURIComponent(url)}`;
-            const { data } = await axios.get(apiUrl, { timeout: 10000 });
-            if (!data?.status || !data.result?.media?.length) {
-                return await sock.sendMessage(chatId, { text: '❌ No media found for this Tweet.' }, { quoted: message });
-            }
-            const tweet = data.result;
-            const caption = `
-📝 @${tweet.authorUsername} (${tweet.authorName})
-📅 ${tweet.date}
-❤️ Likes: ${tweet.likes} | 🔁 Retweets: ${tweet.retweets} | 💬 Replies: ${tweet.replies}
+            await sock.sendMessage(chatId, { text:`🍫 *Download X...* ⏳`,...channelInfo }, { quoted: message });
 
-💬 ${tweet.text}
-      `.trim();
+            const apiUrl = `https://discardapi.dpdns.org/api/dl/twitter?apikey=guru&url=${encodeURIComponent(url)}`;
+            const { data } = await axios.get(apiUrl, { timeout: 15000 });
+
+            if (!data?.status ||!data.result?.media?.length) {
+                return sock.sendMessage(chatId, { text:`💀 Aucun media trouvé sur ce Tweet chef!`,...channelInfo }, { quoted: message });
+            }
+
+            const tweet = data.result;
+            const caption = `🍫 *CHOCO X DL* 😈\n\n📝 @${tweet.authorUsername} (${tweet.authorName})\n📅 ${tweet.date}\n❤️ ${tweet.likes} | 🔁 ${tweet.retweets} | 💬 ${tweet.replies}\n\n💬 ${tweet.text}\n\n> _By CHOCO-ITACHI-V2_`.trim();
+
             for (const mediaItem of tweet.media) {
                 if (mediaItem.type === 'video') {
-                    await sock.sendMessage(chatId, { video: { url: mediaItem.url }, caption }, { quoted: message });
+                    await sock.sendMessage(chatId, { video: { url: mediaItem.url }, caption,...channelInfo }, { quoted: message });
+                } else if (mediaItem.type === 'image') {
+                    await sock.sendMessage(chatId, { image: { url: mediaItem.url }, caption,...channelInfo }, { quoted: message });
                 }
-                else if (mediaItem.type === 'image') {
-                    await sock.sendMessage(chatId, { image: { url: mediaItem.url }, caption }, { quoted: message });
-                }
             }
-        }
-        catch (error) {
-            console.error('Twitter plugin error:', error);
-            if (error.code === 'ECONNABORTED') {
-                await sock.sendMessage(chatId, { text: '❌ Request timed out. The API may be slow or unreachable.' }, { quoted: message });
-            }
-            else {
-                await sock.sendMessage(chatId, { text: '❌ Failed to fetch Twitter/X media.' }, { quoted: message });
-            }
+
+        } catch (error) {
+            console.error('[CHOCO TWITTER] Error:', error);
+            const msg = error.code === 'ECONNABORTED'? '💀 Timeout API, réessaye chef!' : '💀 Impossible de fetch ce Tweet!';
+            await sock.sendMessage(chatId, { text: msg,...channelInfo }, { quoted: message });
         }
     }
 };
