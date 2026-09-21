@@ -1,7 +1,7 @@
 {
-  "name": "mega-md",
-  "version": "6.0.0",
-  "description": "High performance multi-device WhatsApp bot",
+  "name": "choco-itachi-v2",
+  "version": "2.0.0",
+  "description": "🍫 CHOCO-ITACHI-V2 - Le bot WhatsApp le plus violent 😈 350+ cmds, Anti 4en1",
   "type": "module",
   "main": "index.js",
   "directories": {
@@ -16,8 +16,8 @@
     "start:fresh": "node reset-data.js && node index.js",
     "dev": "nodemon --watch . --ext js --ignore node_modules --ignore data --ignore session --ignore temp index.js",
     "reset-data": "node reset-data.js",
-    "reset-session": "node -e \"import('fs').then(f=>f.default.rmSync('./session',{recursive:true,force:true})).then(()=>console.log('Session cleared!'))\"",
-    "build": "echo 'No build step needed - plain JS'",
+    "reset-session": "node -e \"import('fs').then(f=>f.default.rmSync('./session',{recursive:true,force:true})).then(()=>console.log('CHOCO Session cleared! 😈'))\"",
+    "build": "echo 'No build needed - CHOCO pure JS'",
     "lint": "eslint . --ext .js",
     "test": "vitest run",
     "test:unit": "vitest run test/unit",
@@ -28,22 +28,23 @@
   "keywords": [
     "whatsapp-bot",
     "baileys-bot",
-    "Mega-Md",
-    "Suhail-Md",
+    "choco-itachi",
+    "choco-md",
+    "choco-bot",
     "multi-device",
     "nodejs-bot",
-    "javascript-bot"
+    "choco-v2"
   ],
-  "homepage": "https://github.com/GlobalTechInfo/MEGA-MD",
+  "homepage": "https://github.com/CHOCO-ITACHI/CHOCO-ITACHI-V2",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GlobalTechInfo/MEGA-MD.git"
+    "url": "git+https://github.com/CHOCO-ITACHI/CHOCO-ITACHI-V2.git"
   },
   "bugs": {
-    "url": "https://github.com/GlobalTechInfo/MEGA-MD/issues"
+    "url": "https://github.com/CHOCO-ITACHI/CHOCO-ITACHI-V2/issues"
   },
   "license": "MIT",
-  "author": "Qasim Ali",
+  "author": "CHOCO ITACHI",
   "dependencies": {
     "@hapi/boom": "^10.0.1",
     "@whiskeysockets/baileys": "^7.0.0-rc14",
