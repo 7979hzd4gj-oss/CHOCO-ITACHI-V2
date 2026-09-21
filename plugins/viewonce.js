@@ -1,49 +1,28 @@
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
+import { channelInfo } from '../lib/messageConfig.js';
+
+const CHOCO_IMG = "https://files.catbox.moe/ykfu82.png";
+
 export default {
     command: 'viewonce',
-    aliases: ['viewmedia', 'vv'],
-    category: 'general',
-    description: 'Re-send a view-once image or video.',
-    usage: '.viewonce (reply to a view-once media)',
+    aliases: ['viewmedia', 'vv', 'chocovv', 'antiviewonce'],
+    category: 'tools',
+    description: 'Débloque vue unique - CHOCO-ITACHI-V2 😈🍫',
+    usage: '🍫vv (réponds à une vue unique)',
     async handler(sock, message, args, context) {
         const chatId = context.chatId || message.key.remoteJid;
+
         try {
+            await sock.sendMessage(chatId, { react: { text: '🍫', key: message.key } });
+
             const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-            const quotedImage = quoted?.imageMessage;
-            const quotedVideo = quoted?.videoMessage;
-            if (quotedImage && quotedImage.viewOnce) {
-                const stream = await downloadContentFromMessage(quotedImage, 'image');
-                let buffer = Buffer.from([]);
-                for await (const chunk of stream)
-                    buffer = Buffer.concat([buffer, chunk]);
-                await sock.sendMessage(chatId, {
-                    image: buffer,
-                    fileName: 'media.jpg',
-                    caption: quotedImage.caption || ''
-                }, { quoted: message });
-            }
-            else if (quotedVideo && quotedVideo.viewOnce) {
-                const stream = await downloadContentFromMessage(quotedVideo, 'video');
-                let buffer = Buffer.from([]);
-                for await (const chunk of stream)
-                    buffer = Buffer.concat([buffer, chunk]);
-                await sock.sendMessage(chatId, {
-                    video: buffer,
-                    fileName: 'media.mp4',
-                    caption: quotedVideo.caption || ''
-                }, { quoted: message });
-            }
-            else {
-                await sock.sendMessage(chatId, {
-                    text: '*Please reply to a view-once image or video.*'
-                }, { quoted: message });
-            }
-        }
-        catch (error) {
-            console.error('Error in viewonceCommand:', error);
-            await sock.sendMessage(chatId, {
-                text: '❌ Failed to retrieve the view-once media. Please try again later.'
-            }, { quoted: message });
-        }
-    }
-};
+            
+            // FIX CHOCO: nouvelle version WhatsApp = viewOnceMessageV2
+            let quotedImage = quoted?.imageMessage;
+            let quotedVideo = quoted?.videoMessage;
+            let quotedAudio = quoted?.audioMessage;
+
+            // Support viewOnceMessage wrapper (Baileys récent)
+            if (quoted?.viewOnceMessage) {
+                quotedImage = quoted.viewOnceMessage.message?.imageMessage;
+                quotedVideo = quoted.viewOnceMessage.message?.videoMessage
