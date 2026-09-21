@@ -2,12 +2,15 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 import fs from 'fs';
 import path from 'path';
 import { uploadToQuax } from '../lib/uploaders.js';
+import { channelInfo } from '../lib/messageConfig.js';
+
 export default {
     command: 'quax',
-    aliases: ['qu', 'qx'],
+    aliases: ['qu', 'qx', 'quaxup'],
     category: 'upload',
-    description: 'Upload to Qu.ax (anonymous)',
-    usage: '.quax (reply to media or caption on media)',
+    description: 'CHOCO - Upload Qu.ax',
+    usage: '.quax (reply ou caption media)',
+
     async handler(sock, message, args, context) {
         const chatId = context.chatId || message.key.remoteJid;
         try {
@@ -16,47 +19,50 @@ export default {
                 message.message?.stickerMessage ||
                 message.message?.documentMessage;
             const quotedMsg = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-            if (!hasMedia && !quotedMsg) {
-                await sock.sendMessage(chatId, { text: '⚠️ Please send media with caption or reply to media!' }, { quoted: message });
-                return;
+
+            if (!hasMedia &&!quotedMsg) {
+                return sock.sendMessage(chatId, {
+                    text:`🍫 *CHOCO QUAX* 😈\n\n💀 Envoie un media chef!`,
+               ...channelInfo
+                }, { quoted: message });
             }
-            const mediaSource = hasMedia ? message.message : quotedMsg;
-            const type = Object.keys(mediaSource).find(key => ['imageMessage', 'videoMessage', 'stickerMessage', 'documentMessage'].includes(key));
-            if (!type) {
-                await sock.sendMessage(chatId, { text: '⚠️ Unsupported media type!' }, { quoted: message });
-                return;
-            }
-            await sock.sendMessage(chatId, { text: 'Uploading to Quax...' }, { quoted: message });
-            const mediaType = type === 'stickerMessage' ? 'sticker' : type.replace('Message', '');
+
+            const mediaSource = hasMedia? message.message : quotedMsg;
+            const type = Object.keys(mediaSource).find(k =>
+                ['imageMessage','videoMessage','stickerMessage','documentMessage'].includes(k)
+            );
+            if (!type) return sock.sendMessage(chatId, { text:`💀 Type non supporté!`,...channelInfo }, { quoted: message });
+
+            await sock.sendMessage(chatId, { text:`🍫 *Upload Qu.ax...* ⏳`,...channelInfo }, { quoted: message });
+
+            const mediaType = type === 'stickerMessage'? 'sticker' : type.replace('Message','');
             const stream = await downloadContentFromMessage(mediaSource[type], mediaType);
             let buffer = Buffer.from([]);
-            for await (const chunk of stream) {
-                buffer = Buffer.concat([buffer, chunk]);
-            }
-            let ext = 'bin';
-            if (type === 'imageMessage')
-                ext = 'jpg';
-            else if (type === 'videoMessage')
-                ext = 'mp4';
-            else if (type === 'stickerMessage')
-                ext = 'webp';
-            else if (mediaSource[type].fileName) {
-                ext = mediaSource[type].fileName.split('.').pop() || 'bin';
-            }
-            const tempDir = path.join('./temp');
-            if (!fs.existsSync(tempDir))
-                fs.mkdirSync(tempDir, { recursive: true });
-            const tempPath = path.join(tempDir, `quax_${Date.now()}.${ext}`);
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+
+            let ext='bin';
+            if (type==='imageMessage') ext='jpg';
+            else if (type==='videoMessage') ext='mp4';
+            else if (type==='stickerMessage') ext='webp';
+            else if (mediaSource[type].fileName) ext = mediaSource[type].fileName.split('.').pop() || 'bin';
+
+            const tempDir='./temp';
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir,{recursive:true});
+            const tempPath=path.join(tempDir,`choco_quax_${Date.now()}.${ext}`);
             fs.writeFileSync(tempPath, buffer);
-            const result = await uploadToQuax(tempPath);
+
+            const result=await uploadToQuax(tempPath);
+
             await sock.sendMessage(chatId, {
-                text: `✅ *Qu.ax Upload Success!*\n\n🔗 ${result.url}`
+                text:`🍫 *QU.AX UPLOAD* 😈\n\n✅ *Réussi chef!*\n🔗 ${result.url}\n\n> _By CHOCO-ITACHI-V2_`,
+           ...channelInfo
             }, { quoted: message });
-            fs.unlinkSync(tempPath);
-        }
-        catch (error) {
-            console.error('Qu.ax Error:', error);
-            await sock.sendMessage(chatId, { text: `❌ Error: ${error.message}` }, { quoted: message });
+
+            try{ fs.unlinkSync(tempPath); }catch{}
+
+        } catch (error) {
+            console.error('[CHOCO QUAX] Error:', error);
+            await sock.sendMessage(chatId, { text:`💀 *Erreur:* ${error.message}`,...channelInfo }, { quoted: message });
         }
     }
 };
