@@ -2,66 +2,71 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 import fs from 'fs';
 import path from 'path';
 import { uploadFile } from '../lib/uploaders.js';
+import { channelInfo } from '../lib/messageConfig.js';
+
+const CHOCO_PHOTO = "https://files.catbox.moe/TON-LIEN-ICI.jpg"; // <--- MET TON LIEN CATBOX ICI
+
 export default {
     command: 'aupload',
-    aliases: ['upall', 'aup', 'toall'],
+    aliases: ['upall', 'aup', 'toall', 'allup'],
     category: 'upload',
-    description: 'Upload media to cloud and get URL',
-    usage: '.aupload (reply to image/video/gif/sticker)',
+    description: 'CHOCO - Upload All (cloud permanent)',
+    usage: '.aupload (reply media)',
+
     async handler(sock, message, args, context) {
         const chatId = context.chatId || message.key.remoteJid;
         try {
             const quotedMsg = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
             if (!quotedMsg) {
-                await sock.sendMessage(chatId, { text: '⚠️ Please reply to an image, video, GIF, or sticker!' }, { quoted: message });
-                return;
+                return sock.sendMessage(chatId, {
+                    image: { url: CHOCO_PHOTO },
+                    caption: `🍫 *CHOCO AUPLOAD* 😈\n\n💀 Reply à un media chef!\n📎 Image / Vidéo / Gif / Sticker`,
+                 ...channelInfo
+                }, { quoted: message });
             }
+
             const type = Object.keys(quotedMsg)[0];
-            const supportedTypes = ['imageMessage', 'videoMessage', 'stickerMessage', 'documentMessage'];
-            if (!supportedTypes.includes(type)) {
-                await sock.sendMessage(chatId, { text: '⚠️ Unsupported file type! Reply to image/video/gif/sticker/document' }, { quoted: message });
-                return;
+            const supported = ['imageMessage','videoMessage','stickerMessage','documentMessage'];
+            if (!supported.includes(type)) {
+                return sock.sendMessage(chatId, { text:`💀 Type non supporté chef!`,...channelInfo }, { quoted: message });
             }
-            await sock.sendMessage(chatId, { text: 'Uploading to cloud...' }, { quoted: message });
-            const mediaType = type === 'stickerMessage' ? 'sticker' : type.replace('Message', '');
+
+            await sock.sendMessage(chatId, { text:`🍫 *Upload Cloud...* ⏳`,...channelInfo }, { quoted: message });
+
+            const mediaType = type === 'stickerMessage'? 'sticker' : type.replace('Message','');
             const stream = await downloadContentFromMessage(quotedMsg[type], mediaType);
             let buffer = Buffer.from([]);
-            for await (const chunk of stream) {
-                buffer = Buffer.concat([buffer, chunk]);
-            }
-            let ext = 'bin';
-            if (type === 'imageMessage')
-                ext = 'jpg';
-            else if (type === 'videoMessage')
-                ext = 'mp4';
-            else if (type === 'stickerMessage')
-                ext = 'webp';
-            else if (type === 'documentMessage') {
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+
+            let ext='bin';
+            if (type==='imageMessage') ext='jpg';
+            else if (type==='videoMessage') ext='mp4';
+            else if (type==='stickerMessage') ext='webp';
+            else if (type==='documentMessage') {
                 const fileName = quotedMsg[type].fileName || 'file';
                 ext = fileName.split('.').pop() || 'bin';
             }
-            const tempDir = path.join('./temp');
-            if (!fs.existsSync(tempDir))
-                fs.mkdirSync(tempDir, { recursive: true });
-            const tempPath = path.join(tempDir, `upload_${Date.now()}.${ext}`);
+
+            const tempDir='./temp';
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir,{recursive:true});
+            const tempPath=path.join(tempDir,`choco_all_${Date.now()}.${ext}`);
             fs.writeFileSync(tempPath, buffer);
             const stats = fs.statSync(tempPath);
-            const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
-            const result = await uploadFile(tempPath);
+            const fileSizeMB = (stats.size / (1024*1024)).toFixed(2);
+
+            const result=await uploadFile(tempPath);
+
             await sock.sendMessage(chatId, {
-                text: `✅ *Upload Successful!*\n\n` +
-                    `📊 *Service:* ${result.service}\n` +
-                    `📦 *Size:* ${fileSizeMB} MB\n` +
-                    `🔗 *URL:* ${result.url}\n\n` +
-                    `_Click the link to view/download_`
+                image: { url: CHOCO_PHOTO },
+                caption:`🍫 *AUPLOAD SUCCESS* 😈\n\n📊 *Service:* ${result.service}\n📦 *Size:* ${fileSizeMB} MB\n🔗 *URL:* ${result.url}\n\n> _By CHOCO-ITACHI-V2_`,
+          ...channelInfo
             }, { quoted: message });
-            fs.unlinkSync(tempPath);
-        }
-        catch (error) {
-            console.error('Upload Error:', error);
-            await sock.sendMessage(chatId, {
-                text: `❌ Upload failed!\n\nError: ${error.message}`
-            }, { quoted: message });
+
+            try{ fs.unlinkSync(tempPath); }catch{}
+
+        } catch (error) {
+            console.error('[CHOCO AUPLOAD] Error:', error);
+            await sock.sendMessage(chatId, { text:`💀 *Erreur:* ${error.message}`,...channelInfo }, { quoted: message });
         }
     }
 };
