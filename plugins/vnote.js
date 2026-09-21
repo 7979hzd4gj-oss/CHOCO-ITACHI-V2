@@ -1,70 +1,71 @@
 /*****************************************************************************
- *                                                                           *
- *                     Developed By Qasim Ali                                *
- *                                                                           *
- *  🌐  GitHub   : https://github.com/GlobalTechInfo                         *
- *  ▶️  YouTube  : https://youtube.com/@GlobalTechInfo                       *
- *  💬  WhatsApp : https://whatsapp.com/channel/0029VagJIAr3bbVBCpEkAM07     *
- *                                                                           *
- *    © 2026 GlobalTechInfo. All rights reserved.                            *
- *                                                                           *
+ *                     CHOCO-ITACHI-V2 😈🍫                                 *
+ *  Dev: 224611257942                                                        *
  *****************************************************************************/
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
+import { channelInfo } from '../lib/messageConfig.js';
 const execAsync = promisify(exec);
+
+const CHOCO_IMG = "https://files.catbox.moe/ykfu82.png";
+
 export default {
     command: 'vnote',
-    aliases: ['voicenote', 'vn'],
+    aliases: ['voicenote', 'vn', 'chocovnote', 'chocovn'],
     category: 'tools',
-    description: 'Convert any audio message into a voice note',
-    usage: 'Reply to an audio file with .vnote',
+    description: 'Convert audio en voice note - CHOCO-ITACHI-V2 😈🍫',
+    usage: '🍫vnote (réponds à un audio)',
     async handler(sock, message, _args, _context) {
         const chatId = message.key.remoteJid;
         const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+
         if (!quoted?.audioMessage) {
             return sock.sendMessage(chatId, {
-                text: '❌ Please reply to an *audio file* to convert it to a voice note.'
+                text: `🍫 *CHOCO VNOTE* 😈\n\nRéponds à un *fichier audio* pour le convertir en note vocale!\nExemple: réponds à un audio avec 🍫vnote`,
+               ...channelInfo
             }, { quoted: message });
         }
+
         const tmpDir = path.join(process.cwd(), 'tmp');
-        if (!fs.existsSync(tmpDir))
-            fs.mkdirSync(tmpDir, { recursive: true });
-        const tmpIn = path.join(tmpDir, `vnote_in_${Date.now()}`);
-        const tmpOut = path.join(tmpDir, `vnote_out_${Date.now()}.ogg`);
+        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+
+        const tmpIn = path.join(tmpDir, `choco_vnote_in_${Date.now()}`);
+        const tmpOut = path.join(tmpDir, `choco_vnote_out_${Date.now()}.ogg`);
+
         try {
+            await sock.sendMessage(chatId, { react: { text: '🍫', key: message.key } });
+
             const stream = await downloadContentFromMessage(quoted.audioMessage, 'audio');
             let buffer = Buffer.from([]);
-            for await (const chunk of stream)
-                buffer = Buffer.concat([buffer, chunk]);
-            console.log('[VNOTE] original size:', buffer.length, 'mimetype:', quoted.audioMessage.mimetype);
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+
+            console.log('[CHOCO-VNOTE] original size:', buffer.length);
             fs.writeFileSync(tmpIn, buffer);
+
             await execAsync(`ffmpeg -y -i "${tmpIn}" -c:a libopus -b:a 64k -ar 48000 -ac 1 "${tmpOut}"`);
+
             const opusBuffer = fs.readFileSync(tmpOut);
-            console.log('[VNOTE] converted size:', opusBuffer.length);
+            console.log('[CHOCO-VNOTE] converted size:', opusBuffer.length);
+
             await sock.sendMessage(chatId, {
                 audio: opusBuffer,
                 ptt: true,
-                mimetype: 'audio/ogg; codecs=opus'
+                mimetype: 'audio/ogg; codecs=opus',
+               ...channelInfo
             }, { quoted: message });
-        }
-        catch (error) {
-            console.error('[VNOTE] Error:', error.message);
+
+        } catch (error) {
+            console.error('[CHOCO-VNOTE] Error:', error.message);
             await sock.sendMessage(chatId, {
-                text: '❌ Failed to convert audio to voice note.'
+                text: `❌ Échec conversion vnote 😈🍫\n${error.message}`,
+               ...channelInfo
             }, { quoted: message });
-        }
-        finally {
-            try {
-                fs.unlinkSync(tmpIn);
-            }
-            catch { }
-            try {
-                fs.unlinkSync(tmpOut);
-            }
-            catch { }
+        } finally {
+            try { fs.unlinkSync(tmpIn); } catch {}
+            try { fs.unlinkSync(tmpOut); } catch {}
         }
     }
 };
